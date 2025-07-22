@@ -39,6 +39,18 @@ public class TownRegistry {
         return true;
     }
 
+    //sets the ground level of the town, generally on town initialization
+    public boolean setGroundLevel(String townName, int groundY) {
+        String key = "towns." + townName.toLowerCase();
+        if (!cfg.contains(key)) return false;
+        cfg.set(key + ".groundY", groundY);
+        save();
+        return true;
+    }
+    public int getGroundLevel(String townName) {
+        return cfg.getInt("towns." + townName.toLowerCase() + ".groundY", 0);
+    }
+
     public void save(){
         try{
             cfg.save(file);
