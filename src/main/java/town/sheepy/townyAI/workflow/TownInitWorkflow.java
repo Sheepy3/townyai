@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import town.sheepy.townyAI.TownyAI;
+import town.sheepy.townyAI.terrain.TerrainHelper;
 
 public class TownInitWorkflow implements Workflow {
     private final TownyAI plugin;      // allow access to registry & dispatch
@@ -61,6 +62,7 @@ public class TownInitWorkflow implements Workflow {
 
                 return false;
             case 3:
+
                 // third ack -> grab leader position & create town in plugin data
                 Player leader = Bukkit.getPlayerExact(leaderName);
                 if (leader == null || !leader.isOnline()) {
@@ -68,8 +70,15 @@ public class TownInitWorkflow implements Workflow {
                     return false;
                 }
                 var chunk = leader.getLocation().getChunk();
+                var groundY = leader.getLocation().getBlockY()-1;
+                plugin.getLogger().info(String.valueOf(groundY));
+                TerrainHelper.flattenChunk(chunk, groundY);
+
                 boolean added = plugin.getRegistry()
                         .addTown(townName, chunk.getX(), chunk.getZ());
+
+                plugin.getRegistry().setGroundLevel(townName, groundY);
+
                 plugin.getLogger().info(added
                         ? "§aTown '" + townName + "' created at chunk (" +
                         chunk.getX() + "," + chunk.getZ() + ")."
