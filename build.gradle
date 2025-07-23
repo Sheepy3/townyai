@@ -17,13 +17,16 @@ repositories {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
-    maven { url 'https://jitpack.io' } // Add this for Towny
+    maven { url 'https://jitpack.io' } // Towny
+    maven { url 'https://maven.enginehub.org/repo/' } // Worldedit
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.5-R0.1-SNAPSHOT")
-    compileOnly 'com.github.TownyAdvanced:Towny:0.99.5.0' // Use latest stable version
+    compileOnly 'com.sk89q.worldedit:worldedit-bukkit:7.2.9'
+    compileOnly 'com.github.TownyAdvanced:Towny:0.99.5.0' // Use latest stable version (lmao make me)
     implementation("com.google.code.gson:gson:2.11.0")
+
 }
 
 tasks {

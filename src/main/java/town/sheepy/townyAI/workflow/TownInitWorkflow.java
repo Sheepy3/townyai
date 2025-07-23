@@ -1,9 +1,11 @@
 package town.sheepy.townyAI.workflow;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import town.sheepy.townyAI.TownyAI;
+import town.sheepy.townyAI.terrain.SchematicHelper;
 import town.sheepy.townyAI.terrain.TerrainHelper;
 
 public class TownInitWorkflow implements Workflow {
@@ -73,6 +75,20 @@ public class TownInitWorkflow implements Workflow {
                 var groundY = leader.getLocation().getBlockY()-1;
                 plugin.getLogger().info(String.valueOf(groundY));
                 TerrainHelper.flattenChunk(chunk, groundY);
+                Location origin = leader.getLocation()
+                    .getChunk()
+                    .getBlock(0,groundY,0)
+                    .getLocation();
+                try {
+                    SchematicHelper.pasteSchematicFromJar(
+                            plugin,
+                            "schematics/homeblock_1_lvl1.schem",
+                            origin
+                    );
+                    plugin.getLogger().info("§aVault schematic pasted.");
+                } catch (Exception e) {
+                    plugin.getLogger().severe("Failed to paste schematic: " + e);
+                }
 
                 boolean added = plugin.getRegistry()
                         .addTown(townName, chunk.getX(), chunk.getZ());
