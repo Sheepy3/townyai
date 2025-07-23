@@ -1,7 +1,9 @@
 package town.sheepy.townyAI.workflow;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import town.sheepy.townyAI.TownyAI;
@@ -24,7 +26,6 @@ public class TownInitWorkflow implements Workflow {
         this.leaderName = leaderName;
         this.code       = code;
     }
-
     @Override
     public String getCode() {
         return code;
@@ -40,6 +41,9 @@ public class TownInitWorkflow implements Workflow {
         );
         plugin.getLogger().info("§aRequested leader spawn (code=" + code + "). Awaiting ACK #1...");
     }
+
+    private Chunk chunk;
+    private int groundY;
 
     @Override
     public boolean onAck(CommandSender sender) {
@@ -68,11 +72,11 @@ public class TownInitWorkflow implements Workflow {
                 // third ack -> grab leader position & create town in plugin data
                 Player leader = Bukkit.getPlayerExact(leaderName);
                 if (leader == null || !leader.isOnline()) {
-                    plugin.getLogger().info("§cLeader bot not online yet.");
+                    plugin.getLogger().info("Leader bot not online yet.");
                     return false;
                 }
-                var chunk = leader.getLocation().getChunk();
-                var groundY = leader.getLocation().getBlockY()-1;
+                chunk = leader.getLocation().getChunk();
+                groundY = leader.getLocation().getBlockY()-1;
                 plugin.getLogger().info(String.valueOf(groundY));
                 TerrainHelper.flattenChunk(chunk, groundY);
                 Location origin = leader.getLocation()
@@ -85,26 +89,47 @@ public class TownInitWorkflow implements Workflow {
                             "schematics/homeblock_1_lvl1.schem",
                             origin
                     );
-                    plugin.getLogger().info("§aVault schematic pasted.");
+                    plugin.getLogger().info("Vault schematic pasted.");
                 } catch (Exception e) {
                     plugin.getLogger().severe("Failed to paste schematic: " + e);
                 }
 
+                int baseCenterX = chunk.getX()*16 + 8;
+                int baseCenterZ = chunk.getZ()*16 + 8;
+                int baseCenterY = groundY+1;
+                Location teleportLoc = new Location(
+                        chunk.getWorld(),
+                        baseCenterX,
+                        baseCenterY,
+                        baseCenterZ
+                );
+                leader.teleport(teleportLoc);
+                plugin.getLogger().info("Teleported leader '" + leaderName +
+                        "' to vault center at " + baseCenterX + "," + baseCenterY + "," + baseCenterZ);
+
+                plugin.getServer().dispatchCommand(
+                        plugin.getServer().getConsoleSender(),
+                        "msg " + leaderName + " set_t_spawn " + code
+                );
+
+                return false;
+            case 4:
+                //final -> register bot town in towns.yml to persist it
                 boolean added = plugin.getRegistry()
                         .addTown(townName, chunk.getX(), chunk.getZ());
 
                 plugin.getRegistry().setGroundLevel(townName, groundY);
 
                 plugin.getLogger().info(added
-                        ? "§aTown '" + townName + "' created at chunk (" +
+                        ? "Town '" + townName + "' created at chunk (" +
                         chunk.getX() + "," + chunk.getZ() + ")."
-                        : "§eTown already exists."
+                        : "Town already exists."
                 );
                 return true;
 
 
             default:
-                plugin.getLogger().info("§eUnexpected ACK stage: " + stage);
+                plugin.getLogger().info("Unexpected ACK stage: " + stage);
                 return true;
         }
     }
