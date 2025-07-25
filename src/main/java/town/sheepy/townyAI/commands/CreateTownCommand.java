@@ -19,8 +19,8 @@ public class CreateTownCommand implements CommandExecutor {
             String label,
             String[] args
     ) {
-        if (args.length != 1) {
-            sender.sendMessage("§cUsage: /" + label + " <townName>");
+        if (args.length != 1 && args.length !=4) {
+            sender.sendMessage("§cUsage: /" + label + " <townName> [X Y]");
             return true;
         }
 
@@ -31,12 +31,30 @@ public class CreateTownCommand implements CommandExecutor {
         String leaderName = "leader" + UUID.randomUUID().toString().substring(0, 8);
         String code       = UUID.randomUUID().toString().replace("-", "");
 
+        boolean manual = (args.length == 4);
+        int coordx = 0, coordz = 0, coordy = 0;
+        if (manual){
+            try {
+                coordx = Integer.parseInt(args[1]);
+                coordy = Integer.parseInt(args[2]);
+                coordz = Integer.parseInt(args[3]);
+            } catch (NumberFormatException e){
+                sender.sendMessage("coordinates must be integers.");
+                return true;
+            }
+        }
+
+
         // 3) Create & register workflow
         TownInitWorkflow wf = new TownInitWorkflow(
                 plugin,
                 townName,
                 leaderName,
-                code
+                code,
+                manual,
+                coordx,
+                coordy,
+                coordz
         );
         plugin.registerWorkflow(wf);
         plugin.getLogger().info("workflow started!");

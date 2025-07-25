@@ -1,5 +1,5 @@
 name: townyAI
-version: '0.1.0'
+version: '0.2.0'
 main: town.sheepy.townyAI.TownyAI
 api-version: '1.21'
 

@@ -15,16 +15,26 @@ public class TownInitWorkflow implements Workflow {
     private final String townName;
     private final String leaderName;
     private final String code;
+    private final boolean manual;
+    private final int coordx, coordy, coordz;
     private int stage = 0;
 
     public TownInitWorkflow(TownyAI plugin,
                             String townName,
                             String leaderName,
-                            String code) {
+                            String code,
+                            boolean manual,
+                            int coordx,
+                            int coordy,
+                            int coordz) {
         this.plugin     = plugin;
         this.townName   = townName;
         this.leaderName = leaderName;
         this.code       = code;
+        this.manual     = manual;
+        this.coordx     = coordx;
+        this.coordy     = coordy;
+        this.coordz     = coordz;
     }
     @Override
     public String getCode() {
@@ -50,15 +60,33 @@ public class TownInitWorkflow implements Workflow {
         stage++;
         switch (stage) {
             case 1:
-                plugin.getLogger().info(leaderName);
-                // first ACK → request leader to RTP
-                plugin.getServer().dispatchCommand(
-                        plugin.getServer().getConsoleSender(),
-                        "msg " + leaderName + " rtp " + code
-                );
-                plugin.getLogger().info("§aACK #1 received. Sent RTP request.");
-                return false;   // not done yet
+                if (manual) {
+                    Player leader = Bukkit.getPlayerExact(leaderName);
+                    if(leader != null && leader.isOnline()){
+                        leader.teleport(new Location(leader.getWorld(), coordx, coordy, coordz));
+                        plugin.getLogger().info("Teleported leader manually to coordinate " +
+                                coordx + ", " + coordy + ", " +coordz);
 
+                        String ackCmd = "ack " + code;
+                        plugin.getServer().dispatchCommand(
+                                plugin.getServer().getConsoleSender(),
+                                ackCmd
+                        );
+                        plugin.getLogger().info("Auto‑ACK #1 for code=" + code);
+                    }else{
+                        plugin.getLogger().warning("Leader bot not online!");
+                    }
+
+                }else{
+                    //plugin.getLogger().info(leaderName);
+                    // first ACK → request leader to RTP
+                    plugin.getServer().dispatchCommand(
+                            plugin.getServer().getConsoleSender(),
+                            "msg " + leaderName + " rtp " + code
+                    );
+                    plugin.getLogger().info("§aACK #1 received. Sent RTP request.");
+                }
+                return false;   // not done yet
             case 2:
                 // second ACK → ask leader to actually create the town in-game.
                 plugin.getServer().dispatchCommand(
