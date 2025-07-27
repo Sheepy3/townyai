@@ -11,4 +11,4 @@ commands:
     description: acknowledgement for a bot workflow
     usage: /ack <code>
 
-depend: [WorldEdit, Towny, Towny-Forceclaim, FlagWar]
+depend: [WorldEdit, Towny, TownyUtilities, FlagWar]

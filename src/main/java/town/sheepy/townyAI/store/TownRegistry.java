@@ -51,6 +51,19 @@ public class TownRegistry {
         return cfg.getInt("towns." + townName.toLowerCase() + ".groundY", 0);
     }
 
+    public boolean setLeaderName(String townName, String leaderName) {
+        String key = "towns." + townName.toLowerCase();
+        if (!cfg.contains(key)) return false;
+        cfg.set(key + ".leader", leaderName);
+        save();
+        return true;
+    }
+
+    public String getLeaderName(String townName) {
+        return cfg.getString("towns." + townName.toLowerCase() + ".leader", null);
+    }
+
+
     public void save(){
         try{
             cfg.save(file);

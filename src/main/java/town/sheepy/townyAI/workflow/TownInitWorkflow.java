@@ -147,7 +147,7 @@ public class TownInitWorkflow implements Workflow {
                         .addTown(townName, chunk.getX(), chunk.getZ());
 
                 plugin.getRegistry().setGroundLevel(townName, groundY);
-
+                plugin.getRegistry().setLeaderName(townName, leaderName);
                 plugin.getLogger().info(added
                         ? "Town '" + townName + "' created at chunk (" +
                         chunk.getX() + "," + chunk.getZ() + ")."
