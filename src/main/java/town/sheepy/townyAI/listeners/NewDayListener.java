@@ -1,7 +1,6 @@
 package town.sheepy.townyAI.listeners;
 
 import com.palmergames.bukkit.towny.TownyAPI;
-import com.palmergames.bukkit.towny.TownyUniverse;
 import com.palmergames.bukkit.towny.event.NewDayEvent;
 import com.palmergames.bukkit.towny.object.Town;
 import org.bukkit.event.EventHandler;
@@ -20,7 +19,7 @@ public class NewDayListener implements Listener {
     @EventHandler
     public void onNewDay(NewDayEvent event){
         plugin.getLogger().info("Towny Newday triggered - Updating AI towns");
-        for (Town townObj : TownyUniverse.getInstance().getTowns()){
+        for (Town townObj : TownyAPI.getInstance().getTowns()){
             String name = townObj.getName();
             plugin.getLogger().info(name);
         }
