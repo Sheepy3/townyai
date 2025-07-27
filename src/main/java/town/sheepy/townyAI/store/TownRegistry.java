@@ -51,6 +51,7 @@ public class TownRegistry {
         return cfg.getInt("towns." + townName.toLowerCase() + ".groundY", 0);
     }
 
+    //stores the name of the town leader on town initialization
     public boolean setLeaderName(String townName, String leaderName) {
         String key = "towns." + townName.toLowerCase();
         if (!cfg.contains(key)) return false;
@@ -61,6 +62,32 @@ public class TownRegistry {
 
     public String getLeaderName(String townName) {
         return cfg.getString("towns." + townName.toLowerCase() + ".leader", null);
+    }
+
+    //track new claim count as town grows
+    public boolean setClaimCount(String townName, int claims) {
+        String key = "towns." + townName.toLowerCase();
+        if (!cfg.contains(key)) return false;
+        cfg.set(key + ".claims", claims);
+        save();
+        return true;
+    }
+
+    public int getClaimCount(String townName) {
+        return cfg.getInt("towns." + townName.toLowerCase() + ".claims", 0);
+    }
+
+    //track resource count as town grows
+    public boolean setResources(String townName, int resources) {
+        String key = "towns." + townName.toLowerCase();
+        if (!cfg.contains(key)) return false;
+        cfg.set(key + ".resources", resources);
+        save();
+        return true;
+    }
+
+    public int getResources(String townName) {
+        return cfg.getInt("towns." + townName.toLowerCase() + ".resources", 0);
     }
 
 
