@@ -21,7 +21,18 @@ public class NewDayListener implements Listener {
         plugin.getLogger().info("Towny Newday triggered - Updating AI towns");
         for (Town townObj : TownyAPI.getInstance().getTowns()){
             String name = townObj.getName();
-            plugin.getLogger().info(name);
+            //plugin.getLogger().info(name);
+
+            int claims = townObj.getTownBlocks().size();
+            registry.setClaimCount(name, claims);
+            int award = claims * 5;
+            int prev = registry.getResources(name);
+            registry.setResources(name, prev + award);
+            plugin.getLogger().info(String.format(
+                    "%s: %d claims → +%d resources (total %d)",
+                    name, claims, award, prev + award
+            ));
+
         }
 
 

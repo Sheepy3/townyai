@@ -3,12 +3,15 @@ package town.sheepy.townyAI.workflow;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import town.sheepy.townyAI.TownyAI;
 import town.sheepy.townyAI.terrain.SchematicHelper;
 import town.sheepy.townyAI.terrain.TerrainHelper;
+
+import java.util.Random;
 
 public class TownInitWorkflow implements Workflow {
     private final TownyAI plugin;      // allow access to registry & dispatch
@@ -143,9 +146,28 @@ public class TownInitWorkflow implements Workflow {
                 return false;
             case 4:
                 //final -> register bot town in towns.yml to persist it
+                // 1) Determine biome
+                Biome homeBiome = chunk.getWorld().getBiome(
+                        chunk.getX()<<4 + 8, groundY, chunk.getZ()<<4 + 8);
+                String value = homeBiome.getKey().value();
+                String type = value.contains("ocean")
+                        ? "ocean" : "normal";
+
+
+                // bell‑curve sampling for town size between 64–225
+                Random rand = new Random();
+                int target = (int) Math.round(256/6.0 * (
+                        rand.nextGaussian() + 2));         // center ~128
+                target = Math.max(64, Math.min(225, target));
+
+
                 boolean added = plugin.getRegistry()
                         .addTown(townName, chunk.getX(), chunk.getZ());
 
+                //metadata
+                plugin.getRegistry().setType(townName, type);
+                plugin.getRegistry().setTargetSize(townName, target);
+                plugin.getRegistry().initBuildings(townName);
                 plugin.getRegistry().setGroundLevel(townName, groundY);
                 plugin.getRegistry().setLeaderName(townName, leaderName);
                 plugin.getLogger().info(added

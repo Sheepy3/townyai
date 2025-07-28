@@ -2,9 +2,12 @@ package town.sheepy.townyAI.store;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+import town.sheepy.townyAI.model.Building;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TownRegistry {
     private final File file;
@@ -89,6 +92,60 @@ public class TownRegistry {
     public int getResources(String townName) {
         return cfg.getInt("towns." + townName.toLowerCase() + ".resources", 0);
     }
+
+
+    public boolean setType(String townName, String type){
+        String key = "towns." + townName.toLowerCase();
+        if (!cfg.contains(key)) return false;
+        cfg.set(key + ".type", type);
+        save();
+        return true;
+    };
+
+    public int getType(String townName) {
+        return cfg.getInt("towns." + townName.toLowerCase() + ".type", 0);
+    }
+
+    public boolean setTargetSize(String townName, int size) {
+        String key = "towns." + townName.toLowerCase();
+        if (!cfg.contains(key)) return false;
+        cfg.set(key + ".targetSize", size);
+        save();
+        return true;
+    }
+    public int getTargetSize(String townName) {
+        return cfg.getInt("towns." + townName.toLowerCase() + ".targetSize", 0);
+    }
+    public boolean initBuildings(String townName) {
+        String key = "towns." + townName.toLowerCase();
+        if (!cfg.contains(key)) return false;
+        cfg.set(key + ".buildings", List.of());
+        save();
+        return true;
+    }
+
+    public List<Building> getBuildings(String townName) {
+        String base = "towns." + townName.toLowerCase() + ".buildings";
+        List<Building> out = new ArrayList<>();
+        if (!cfg.contains(base)) return out;
+
+        for (var entry : cfg.getMapList(base)) {
+            Object lvl = entry.get("level");
+            Object x   = entry.get("chunkX");
+            Object z   = entry.get("chunkZ");
+            if (lvl instanceof Number && x instanceof Number && z instanceof Number) {
+                out.add(new Building(
+                        ((Number)lvl).intValue(),
+                        ((Number)x).intValue(),
+                        ((Number)z).intValue()
+                ));
+            }
+        }
+        return out;
+    }
+
+
+
 
 
     public void save(){
