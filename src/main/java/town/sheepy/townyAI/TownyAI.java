@@ -1,5 +1,6 @@
 package town.sheepy.townyAI;
 import org.bukkit.plugin.java.JavaPlugin;
+import town.sheepy.townyAI.commands.ChunkStatsCommand;
 import town.sheepy.townyAI.listeners.NewDayListener;
 import town.sheepy.townyAI.workflow.TownInitWorkflow;
 import java.util.*;
@@ -20,10 +21,13 @@ public final class TownyAI extends JavaPlugin {
         // Plugin startup logic
         getLogger().info("TownyAI is now enabled!");
         registry = new TownRegistry(this);
+
         this.getCommand("createtown")
                 .setExecutor(new CreateTownCommand(this));
         this.getCommand("ack")
                 .setExecutor(new AckCommand(this));
+        this.getCommand("chunkstats")
+                .setExecutor(new ChunkStatsCommand(this));
 
         getServer().getPluginManager()
                 .registerEvents(new NewDayListener(this), this);

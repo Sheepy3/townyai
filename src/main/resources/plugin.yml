@@ -10,5 +10,8 @@ commands:
   ack:
     description: acknowledgement for a bot workflow
     usage: /ack <code>
+  chunkstats:
+    description: Shows the max non‑tree height of your current chunk.
+    usage: /<command>
 
 depend: [WorldEdit, Towny, TownyUtilities, FlagWar]

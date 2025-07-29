@@ -4,6 +4,49 @@ import org.bukkit.Material;
 import org.bukkit.World;
 public class TerrainHelper {
 
+    public static int chebyshevDistance(int x1, int z1, int x2, int z2) {
+        return Math.max(
+                Math.abs(x1 - x2),
+                Math.abs(z1 - z2)
+        );
+    }
+    public static int chunkHeightNoTree(Chunk chunk) {
+        World world = chunk.getWorld();
+        int baseX = chunk.getX() << 4;
+        int baseZ = chunk.getZ() << 4;
+        int maxGroundY = 0;
+
+        for (int dx = 0; dx < 16; dx++) {
+            for (int dz = 0; dz < 16; dz++) {
+                int x = baseX + dx;
+                int z = baseZ + dz;
+
+                int y = world.getHighestBlockYAt(x, z);
+                // step down until we hit non‑tree material
+                while (y > 0 && isTreeBlock(world.getBlockAt(x, y, z).getType()) || !world.getBlockAt(x,y,z).isSolid()) {
+                    y--;
+                }
+                if (y > maxGroundY) {
+                    maxGroundY = y;
+                }
+            }
+        }
+        return maxGroundY;
+    }
+
+    private static boolean isTreeBlock(Material mat) {
+        String name = mat.name();
+        return name.contains("LOG")
+                || name.contains("LEAVES")
+                || name.contains("SAPLING")
+                || name.contains("WOOD")
+                || name.contains("VINE");
+    }
+
+
+
+
+
     public static void flattenChunk(Chunk chunk, int groundY) {
         World world = chunk.getWorld();
         int baseX = chunk.getX() * 16;
