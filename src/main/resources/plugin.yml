@@ -12,6 +12,6 @@ commands:
     usage: /ack <code>
   chunkstats:
     description: Shows the max non‑tree height of your current chunk.
-    usage: /<command>
+    usage: /chunkstats [townname]
 
 depend: [WorldEdit, Towny, TownyUtilities, FlagWar]

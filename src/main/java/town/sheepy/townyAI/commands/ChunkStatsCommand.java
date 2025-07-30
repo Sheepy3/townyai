@@ -5,6 +5,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import town.sheepy.townyAI.TownyAI;
+import town.sheepy.townyAI.growth.Growth;
 import town.sheepy.townyAI.terrain.TerrainHelper;
 
 public class ChunkStatsCommand implements CommandExecutor {
@@ -24,17 +25,26 @@ public class ChunkStatsCommand implements CommandExecutor {
             return true;
         }
 
-        // Get the player's current chunk
-        var chunk = p.getLocation().getChunk();
+        var chunk = p.getLocation().getChunk(); //player chunk
+        if (args.length == 0) {
+            int height = TerrainHelper.chunkHeightNoTree(chunk);
+            p.sendMessage("§aChunkStats: (" + chunk.getX() + "," + chunk.getZ() +
+                    ") non‑tree height = " + height);
+            return true;
+        }
 
-        // Compute the non‑tree height
-        int height = TerrainHelper.chunkHeightNoTree(chunk);
+        String townName = args[0];
+        var score = Growth.gradeChunk(chunk, townName, plugin.getRegistry());
 
-        // Report back
-        p.sendMessage(String.format(
-                "§aChunkStats: chunk (%d,%d) non‑tree height = %d",
-                chunk.getX(), chunk.getZ(), height
-        ));
+        p.sendMessage("§eChunkStats for town §6" + townName + "§e at chunk (" +
+                chunk.getX() + "," + chunk.getZ() + "):");
+        p.sendMessage(String.format("  › Distance bonus: %.3f", score.distScore()));
+        p.sendMessage(String.format("  › Biome penalty: %.3f", score.biomePenalty()));
+        p.sendMessage(String.format("  › Height bonus:   %.3f", score.heightBonus()));
+        p.sendMessage(String.format("  › Total score:    %.3f", score.totalScore()));
         return true;
+
+
+
     }
 }

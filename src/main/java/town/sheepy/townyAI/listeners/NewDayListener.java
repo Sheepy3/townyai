@@ -3,10 +3,16 @@ package town.sheepy.townyAI.listeners;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.event.NewDayEvent;
 import com.palmergames.bukkit.towny.object.Town;
+import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
+import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import town.sheepy.townyAI.TownyAI;
+import town.sheepy.townyAI.growth.Growth;
 import town.sheepy.townyAI.store.TownRegistry;
+
+import java.util.List;
 
 public class NewDayListener implements Listener {
     private final TownyAI plugin;
@@ -20,8 +26,14 @@ public class NewDayListener implements Listener {
     public void onNewDay(NewDayEvent event){
         plugin.getLogger().info("Towny Newday triggered - Updating AI towns");
         for (Town townObj : TownyAPI.getInstance().getTowns()){
+
             String name = townObj.getName();
             //plugin.getLogger().info(name);
+
+            if (!registry.containsTown(name)) {
+                // skip—don’t re‑create this town’s data
+                continue;
+            }
 
             int claims = townObj.getTownBlocks().size();
             registry.setClaimCount(name, claims);
@@ -32,6 +44,15 @@ public class NewDayListener implements Listener {
                     "%s: %d claims → +%d resources (total %d)",
                     name, claims, award, prev + award
             ));
+
+            int chunkX = registry.getChunkX(name);
+            int chunkZ = registry.getChunkZ(name);
+            World world = Bukkit.getWorld("world");
+            Chunk homeChunk = world.getChunkAt(chunkX,chunkZ);
+            List<Chunk> picks = Growth.selectChunksToClaim(homeChunk, name, registry, 2);
+            plugin.getLogger().info("Chunks to claim: " + picks);
+
+
 
         }
 

@@ -4,12 +4,6 @@ import org.bukkit.Material;
 import org.bukkit.World;
 public class TerrainHelper {
 
-    public static int chebyshevDistance(int x1, int z1, int x2, int z2) {
-        return Math.max(
-                Math.abs(x1 - x2),
-                Math.abs(z1 - z2)
-        );
-    }
     public static int chunkHeightNoTree(Chunk chunk) {
         World world = chunk.getWorld();
         int baseX = chunk.getX() << 4;

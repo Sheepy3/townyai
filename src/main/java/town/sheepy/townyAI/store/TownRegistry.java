@@ -102,8 +102,8 @@ public class TownRegistry {
         return true;
     };
 
-    public int getType(String townName) {
-        return cfg.getInt("towns." + townName.toLowerCase() + ".type", 0);
+    public String getType(String townName) {
+        return cfg.getString("towns." + townName.toLowerCase() + ".type", "normal");
     }
 
     public boolean setTargetSize(String townName, int size) {
@@ -116,6 +116,7 @@ public class TownRegistry {
     public int getTargetSize(String townName) {
         return cfg.getInt("towns." + townName.toLowerCase() + ".targetSize", 0);
     }
+
     public boolean initBuildings(String townName) {
         String key = "towns." + townName.toLowerCase();
         if (!cfg.contains(key)) return false;
@@ -144,8 +145,17 @@ public class TownRegistry {
         return out;
     }
 
+    public int getChunkX(String townName) {
+        return cfg.getInt("towns." + townName.toLowerCase() + ".x");
+    }
 
+    public int getChunkZ(String townName) {
+        return cfg.getInt("towns." + townName.toLowerCase() + ".z");
+    }
 
+    public boolean containsTown(String townName) {
+        return cfg.contains("towns." + townName.toLowerCase());
+    }
 
 
     public void save(){
