@@ -4,10 +4,8 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import town.sheepy.townyAI.TownyAI;
 import town.sheepy.townyAI.store.TownRegistry;
 import town.sheepy.townyAI.terrain.TerrainHelper;
 
@@ -26,8 +24,7 @@ public class Growth {
     public static List<Chunk> selectChunksToClaim(
             Chunk homeChunk,
             String townName,
-            TownRegistry registry,
-            int count
+            TownRegistry registry
     ) {
         World world = homeChunk.getWorld();
         int homeX = homeChunk.getX(), homeZ = homeChunk.getZ();
@@ -76,7 +73,7 @@ public class Growth {
 
         int homeY     = registry.getGroundLevel(townName);
         String type   = registry.getType(townName);
-        Biome homeBiome  = world.getBiome(homeX<<4 + 8, homeY, homeZ<<4 + 8);
+        Biome homeBiome  = world.getBiome(homeX*16, homeY, homeZ*16);
 
         // Candidate data
         int x = candidate.getX(), z = candidate.getZ();
@@ -86,25 +83,28 @@ public class Growth {
 
         // 1) Distance bonus
         int dist       = chebyshevDistance(homeX, homeZ, x, z);
-        double distScore = 50.0 / (dist*dist + 1);
-        JavaPlugin.getPlugin(TownyAI.class).getLogger().info(String.format(
-                "distance: " + dist));
+        double distScore = 60.0 / (dist + 1);
+        //JavaPlugin.getPlugin(TownyAI.class).getLogger().info(String.format(
+        //        "distance: " + dist));
+
+
         // 2) Biome penalty
         double biomePenalty = 0;
         String homeBiomeId = homeBiome.getKey().value();
         String candBiomeId = candBiome.getKey().value();
-        JavaPlugin.getPlugin(TownyAI.class).getLogger().info(String.format(
-                candBiomeId));
+        //JavaPlugin.getPlugin(TownyAI.class).getLogger().info(String.format(
+        //        candBiomeId));
         boolean homeOcean = homeBiomeId.contains("ocean");
         boolean candOcean = candBiomeId.contains("ocean");
         if (homeOcean && !candOcean) biomePenalty = 25;
         if (!homeOcean && candOcean) biomePenalty = 25;
-        // 3) Height bonus (prefer lower ground)
-        double heightBonus = Math.abs(homeY - candY);
+
+        // 3) Height penalty (prefer ground closer to homeblock)
+        double heightPenalty = Math.abs(homeY - candY);
 
         // Total (lower = better)
-        double total = -distScore + biomePenalty + heightBonus;
-        return new Score(distScore, biomePenalty, heightBonus, total);
+        double total = -distScore + biomePenalty + heightPenalty;
+        return new Score(distScore, biomePenalty, heightPenalty, total);
     }
 
     //score components record
