@@ -7,7 +7,10 @@ import town.sheepy.townyAI.model.Building;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class TownRegistry {
     private final File file;
@@ -42,6 +45,10 @@ public class TownRegistry {
         return true;
     }
 
+    public boolean containsTown(String townName) {
+        return cfg.contains("towns." + townName.toLowerCase());
+    }
+
     //sets the ground level of the town, generally on town initialization
     public boolean setGroundLevel(String townName, int groundY) {
         String key = "towns." + townName.toLowerCase();
@@ -50,6 +57,7 @@ public class TownRegistry {
         save();
         return true;
     }
+
     public int getGroundLevel(String townName) {
         return cfg.getInt("towns." + townName.toLowerCase() + ".groundY", 0);
     }
@@ -113,14 +121,32 @@ public class TownRegistry {
         save();
         return true;
     }
+
     public int getTargetSize(String townName) {
         return cfg.getInt("towns." + townName.toLowerCase() + ".targetSize", 0);
     }
 
+    /*
+    MARKED FOR DELECTION
     public boolean initBuildings(String townName) {
         String key = "towns." + townName.toLowerCase();
         if (!cfg.contains(key)) return false;
         cfg.set(key + ".buildings", List.of());
+        save();
+        return true;
+    }*/
+
+    public boolean addBuilding(String townName, Building b) {
+        String base = "towns." + townName.toLowerCase() + ".buildings";
+        List<Map<?,?>> list = cfg.getMapList(base);
+        var map = new LinkedHashMap<String,Object>();
+        map.put("type",        b.type());
+        map.put("level",       b.level());
+        map.put("chunkX",      b.chunkX());
+        map.put("chunkZ",      b.chunkZ());
+        map.put("overwriteable", b.overwriteable());
+        list.add(map);
+        cfg.set(base, list);
         save();
         return true;
     }
@@ -130,20 +156,29 @@ public class TownRegistry {
         List<Building> out = new ArrayList<>();
         if (!cfg.contains(base)) return out;
 
-        for (var entry : cfg.getMapList(base)) {
+        for (Map<?,?> entry : cfg.getMapList(base)) {
             Object lvl = entry.get("level");
             Object x   = entry.get("chunkX");
             Object z   = entry.get("chunkZ");
             if (lvl instanceof Number && x instanceof Number && z instanceof Number) {
                 out.add(new Building(
+                        (String)entry.get("type"),
                         ((Number)lvl).intValue(),
                         ((Number)x).intValue(),
-                        ((Number)z).intValue()
+                        ((Number)z).intValue(),
+                        Boolean.TRUE.equals(entry.get("overwriteable"))
                 ));
             }
         }
         return out;
     }
+
+    public List<Building> getBuildingsByType(String townName, String type) {
+        return getBuildings(townName).stream()
+                .filter(b -> b.type().equalsIgnoreCase(type))
+                .collect(Collectors.toList());
+    }
+
 
     public int getChunkX(String townName) {
         return cfg.getInt("towns." + townName.toLowerCase() + ".x");
@@ -153,9 +188,6 @@ public class TownRegistry {
         return cfg.getInt("towns." + townName.toLowerCase() + ".z");
     }
 
-    public boolean containsTown(String townName) {
-        return cfg.contains("towns." + townName.toLowerCase());
-    }
 
 
     public void save(){

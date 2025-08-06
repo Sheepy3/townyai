@@ -50,7 +50,7 @@ public class SchematicHelper {
                 .createPaste(editSession)
                 .to(BlockVector3.at(
                         targetLoc.getBlockX(),
-                        targetLoc.getBlockY(),
+                        targetLoc.getBlockY()+1,
                         targetLoc.getBlockZ()
                 ))
                 .ignoreAirBlocks(false)

@@ -8,6 +8,7 @@ import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import town.sheepy.townyAI.TownyAI;
+import town.sheepy.townyAI.model.Building;
 import town.sheepy.townyAI.terrain.SchematicHelper;
 import town.sheepy.townyAI.terrain.TerrainHelper;
 
@@ -167,7 +168,6 @@ public class TownInitWorkflow implements Workflow {
                 //metadata
                 plugin.getRegistry().setType(townName, type);
                 plugin.getRegistry().setTargetSize(townName, target);
-                plugin.getRegistry().initBuildings(townName);
                 plugin.getRegistry().setGroundLevel(townName, groundY);
                 plugin.getRegistry().setLeaderName(townName, leaderName);
                 plugin.getLogger().info(added
@@ -175,9 +175,11 @@ public class TownInitWorkflow implements Workflow {
                         chunk.getX() + "," + chunk.getZ() + ")."
                         : "Town already exists."
                 );
+                plugin.getRegistry().addBuilding(
+                        townName,
+                        new Building("vault", 1, chunk.getX(), chunk.getZ(), false)
+                );
                 return true;
-
-
             default:
                 plugin.getLogger().info("Unexpected ACK stage: " + stage);
                 return true;
