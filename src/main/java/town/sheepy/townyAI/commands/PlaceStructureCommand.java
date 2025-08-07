@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.Chunk;
 import town.sheepy.townyAI.TownyAI;
 import town.sheepy.townyAI.terrain.SchematicHelper;
+import town.sheepy.townyAI.terrain.TerrainHelper;
 
 public class PlaceStructureCommand implements CommandExecutor {
     private final TownyAI plugin;
@@ -40,12 +41,13 @@ public class PlaceStructureCommand implements CommandExecutor {
         // Determine world block corner
         int originX = chunk.getX() << 4;
         int originZ = chunk.getZ() << 4;
-        int originY = player.getLocation().getBlockY();
+        int originY = player.getLocation().getBlockY()-1;
         Location origin = new Location(chunk.getWorld(), originX, originY, originZ);
 
         sender.sendMessage("§aPlacing schematic '" + schematic + "' with rotation " + rotation);
         try {
             // Call the 4-arg helper
+            TerrainHelper.flattenChunk(chunk, originY);
             SchematicHelper.pasteSchematicFromJar(plugin, schematic, origin, rotation);
             sender.sendMessage("§aSchematic placed.");
         } catch (Exception ex) {

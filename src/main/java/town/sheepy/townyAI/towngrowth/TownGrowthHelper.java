@@ -95,9 +95,9 @@ public class TownGrowthHelper {
     public static IntVector2 rotationOffset(int rotationDegrees) {
         return switch ((rotationDegrees % 360 + 360) % 360) {
             case 0   -> new IntVector2(0,  0);
-            case 90  -> new IntVector2(16, 0);
-            case 180 -> new IntVector2(16, 16);
-            case 270 -> new IntVector2(0,  16);
+            case 90  -> new IntVector2(0, 15);
+            case 180 -> new IntVector2(15, 15);
+            case 270 -> new IntVector2(15,  0);
             default -> throw new IllegalArgumentException("Rotation must be 0/90/180/270");
         };
     }
