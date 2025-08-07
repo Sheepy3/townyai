@@ -13,5 +13,7 @@ commands:
   chunkstats:
     description: Shows the max non‑tree height of your current chunk.
     usage: /chunkstats [townname]
-
+  placestructure:
+    description: Place a schematic in your current chunk for testing.
+    usage: /placestructure <schematic> [rotation]
 depend: [WorldEdit, Towny, TownyUtilities, FlagWar]

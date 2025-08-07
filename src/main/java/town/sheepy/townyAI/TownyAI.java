@@ -1,6 +1,7 @@
 package town.sheepy.townyAI;
 import org.bukkit.plugin.java.JavaPlugin;
 import town.sheepy.townyAI.commands.ChunkStatsCommand;
+import town.sheepy.townyAI.commands.PlaceStructureCommand;
 import town.sheepy.townyAI.listeners.NewDayListener;
 import town.sheepy.townyAI.workflow.TownInitWorkflow;
 import java.util.*;
@@ -28,6 +29,8 @@ public final class TownyAI extends JavaPlugin {
                 .setExecutor(new AckCommand(this));
         this.getCommand("chunkstats")
                 .setExecutor(new ChunkStatsCommand(this));
+        this.getCommand("placestructure")
+                .setExecutor(new PlaceStructureCommand(this));
 
         getServer().getPluginManager()
                 .registerEvents(new NewDayListener(this), this);
