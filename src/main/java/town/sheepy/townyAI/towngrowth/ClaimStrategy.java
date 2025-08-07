@@ -1,25 +1,75 @@
-package town.sheepy.townyAI.growth;
+package town.sheepy.townyAI.towngrowth;
 
 import com.palmergames.bukkit.towny.TownyAPI;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import town.sheepy.townyAI.TownyAI;
 import town.sheepy.townyAI.store.TownRegistry;
 import town.sheepy.townyAI.terrain.TerrainHelper;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static town.sheepy.townyAI.growth.TownGrowthHelper.*;
+import static town.sheepy.townyAI.towngrowth.TownGrowthHelper.*;
 
-public class Growth {
+public class ClaimStrategy {
+
+    private final TownyAI plugin;
+    private final TownRegistry registry;
+    //private static final Logger log = LoggerFactory.getLogger(ClaimStrategy.class);
+
+    public ClaimStrategy(TownyAI plugin, TownRegistry registry) {
+        this.plugin   = plugin;
+        this.registry = registry;
+    }
+
+    public void claim(String name, Chunk homeChunk, int toClaim){
+        var candidates = ClaimStrategy.selectChunksToClaim(
+                homeChunk, name, registry
+        );
+
+        if (candidates.isEmpty()) {
+            plugin.getLogger().info(name + " has no adjacent candidates.");
+            return;
+        }
+
+        List<Chunk> sorted = candidates.stream()
+                .map(chunk -> new Object[]{chunk, ClaimStrategy.gradeChunk(chunk, name, registry)})
+                .sorted(Comparator.comparingDouble(o -> ((ClaimStrategy.Score) o[1]).totalScore()))
+                .map(o -> (Chunk) o[0])
+                .collect(Collectors.toList());
+
+        // **Dispatch claims synchronously**
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < toClaim && i < sorted.size(); i++) {
+                    Chunk c = sorted.get(i);
+                    plugin.getServer().dispatchCommand(
+                            plugin.getServer().getConsoleSender(),
+                            String.format("townyadmin claim %s %d %d",
+                                    name, c.getX(), c.getZ())
+                    );
+                    registry.setClaimCount(name, registry.getClaimCount(name) + 1);
+                    plugin.getLogger().info(String.format(
+                            "%s auto‑claimed chunk (%d,%d) [#%d/%d]",
+                            name, c.getX(), c.getZ(), i + 1, toClaim
+                    ));
+                }
+            }
+        }.runTask(plugin);
+    }
 
 
-    private static final Logger log = LoggerFactory.getLogger(Growth.class);
+
+
 
     public static List<Chunk> selectChunksToClaim(
             Chunk homeChunk,

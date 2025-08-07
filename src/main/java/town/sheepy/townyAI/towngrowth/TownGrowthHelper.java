@@ -1,16 +1,14 @@
-package town.sheepy.townyAI.growth;
+package town.sheepy.townyAI.towngrowth;
 
 import org.bukkit.Chunk;
 import org.bukkit.World;
-import org.bukkit.block.Biome;
 import town.sheepy.townyAI.model.Building;
 import town.sheepy.townyAI.store.TownRegistry;
-import town.sheepy.townyAI.terrain.TerrainHelper;
 
 import java.util.*;
 
 /**
- * Helpers for town growth: adjacency, empty‑region search, and rotation offsets.
+ * Helpers for town towngrowth: adjacency, empty‑region search, and rotation offsets.
  */
 public class TownGrowthHelper {
 

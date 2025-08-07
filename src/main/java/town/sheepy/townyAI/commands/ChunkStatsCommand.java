@@ -5,7 +5,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import town.sheepy.townyAI.TownyAI;
-import town.sheepy.townyAI.growth.Growth;
+import town.sheepy.townyAI.towngrowth.ClaimStrategy;
 import town.sheepy.townyAI.terrain.TerrainHelper;
 
 public class ChunkStatsCommand implements CommandExecutor {
@@ -34,7 +34,7 @@ public class ChunkStatsCommand implements CommandExecutor {
         }
 
         String townName = args[0];
-        var score = Growth.gradeChunk(chunk, townName, plugin.getRegistry());
+        var score = ClaimStrategy.gradeChunk(chunk, townName, plugin.getRegistry());
 
         p.sendMessage("§eChunkStats for town §6" + townName + "§e at chunk (" +
                 chunk.getX() + "," + chunk.getZ() + "):");
