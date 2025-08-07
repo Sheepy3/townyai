@@ -48,8 +48,11 @@ public class FarmStrategy {
                             // paste
                             Location origin = chunk.getBlock(0, groundY, 0).getLocation();
                             TerrainHelper.flattenChunk(chunk, groundY);
+                            int[] options = {0, 90, 180, 270};
+                            int rot = options[new Random().nextInt(options.length)];
                             try {
-                                SchematicHelper.pasteSchematicFromJar(plugin, schematic, origin);
+                                SchematicHelper.pasteSchematicFromJar(plugin, schematic, origin, rot);
+                                plugin.getLogger().info(String.valueOf(rot));
                             } catch (Exception e) {
                                 plugin.getLogger().severe("Failed to paste schematic: " + e);
                             }
