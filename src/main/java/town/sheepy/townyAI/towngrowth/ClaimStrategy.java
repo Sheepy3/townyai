@@ -77,10 +77,10 @@ public class ClaimStrategy {
             TownRegistry registry
     ) {
         World world = homeChunk.getWorld();
-        int homeX = homeChunk.getX(), homeZ = homeChunk.getZ();
-        int homeY = registry.getGroundLevel(townName);
-        String type = registry.getType(townName);  // "ocean" or "normal"
-        Biome homeBiome = world.getBiome(homeX << 4 + 8, homeY, homeZ << 4 + 8);
+        //int homeX = homeChunk.getX(), homeZ = homeChunk.getZ();
+        //int homeY = registry.getGroundLevel(townName);
+        //String type = registry.getType(townName);  // "ocean" or "normal"
+        //Biome homeBiome = world.getBiome(homeX << 4 + 8, homeY, homeZ << 4 + 8);
 
         // 1) Collect claimed coords
         Set<ChunkPos> claimed = TownyAPI.getInstance()
@@ -133,7 +133,7 @@ public class ClaimStrategy {
 
         // 1) Distance bonus
         int dist       = chebyshevDistance(homeX, homeZ, x, z);
-        double distScore = 60.0 / (dist + 1);
+        double distScore = 100.0 / (dist + 1);
         //JavaPlugin.getPlugin(TownyAI.class).getLogger().info(String.format(
         //        "distance: " + dist));
 

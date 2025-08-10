@@ -6,10 +6,8 @@ import town.sheepy.townyAI.model.Building;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class TownRegistry {
@@ -126,16 +124,6 @@ public class TownRegistry {
         return cfg.getInt("towns." + townName.toLowerCase() + ".targetSize", 0);
     }
 
-    /*
-    MARKED FOR DELECTION
-    public boolean initBuildings(String townName) {
-        String key = "towns." + townName.toLowerCase();
-        if (!cfg.contains(key)) return false;
-        cfg.set(key + ".buildings", List.of());
-        save();
-        return true;
-    }*/
-
     public boolean addBuilding(String townName, Building b) {
         String base = "towns." + townName.toLowerCase() + ".buildings";
         List<Map<?,?>> list = cfg.getMapList(base);
@@ -179,6 +167,68 @@ public class TownRegistry {
                 .collect(Collectors.toList());
     }
 
+
+    public Optional<Building> getBuildingAt(String townName, int chunkX, int chunkZ) {
+        return getBuildings(townName).stream()
+                .filter(b -> b.chunkX() == chunkX && b.chunkZ() == chunkZ)
+                .findFirst();
+    }
+
+    public boolean removeBuilding(String townName, Building target) {
+        String base = "towns." + townName.toLowerCase() + ".buildings";
+
+        // Load as mutable list of maps (String,Object). idk why this shit is so complicated it should probably
+        // be replaced with something more normal.
+        List<Map<String, Object>> list = cfg.getMapList(base).stream()
+                .map(raw -> {
+                    Map<String, Object> copy = new LinkedHashMap<>();
+                    for (Map.Entry<?, ?> e : raw.entrySet()) {
+                        copy.put(String.valueOf(e.getKey()), e.getValue());
+                    }
+                    return copy;
+                })
+                .collect(Collectors.toList());
+
+        int before = list.size();
+
+        list.removeIf(m ->
+                Objects.equals(m.get("type"), target.type()) &&
+                        ((Number) m.getOrDefault("level", 0)).intValue()   == target.level()   &&
+                        ((Number) m.getOrDefault("chunkX", 0)).intValue() == target.chunkX()  &&
+                        ((Number) m.getOrDefault("chunkZ", 0)).intValue() == target.chunkZ()
+        );
+
+        cfg.set(base, list);
+        save();
+        return list.size() != before;
+    }
+
+    /** Bulk-remove by predicate (handy for “remove all walls” etc.). Returns # removed. */
+    public int removeBuildingsWhere(String townName, Predicate<Building> test) {
+        String base = "towns." + townName.toLowerCase() + ".buildings";
+        List<Building> all = getBuildings(townName);
+        int removed = 0;
+
+        // keep only those that DON'T match the predicate
+        List<Map<String, Object>> kept = new ArrayList<>();
+        for (Building b : all) {
+            if (test.test(b)) {
+                removed++;
+                continue;
+            }
+            Map<String,Object> map = new LinkedHashMap<>();
+            map.put("type",         b.type());
+            map.put("level",        b.level());
+            map.put("chunkX",       b.chunkX());
+            map.put("chunkZ",       b.chunkZ());
+            map.put("overwriteable", b.overwriteable());
+            kept.add(map);
+        }
+
+        cfg.set(base, kept);
+        save();
+        return removed;
+    }
 
     public int getChunkX(String townName) {
         return cfg.getInt("towns." + townName.toLowerCase() + ".x");
