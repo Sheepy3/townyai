@@ -35,7 +35,7 @@ public class WallStrategy {
 
         org.bukkit.World bworld = plugin.getServer().getWorld("world");
         int groundY = registry.getGroundLevel(townName);
-
+        java.util.List<WallTask> tasks = new java.util.ArrayList<>();
         for (ChunkPos pos : claimed) {
             // Figure out if this chunk borders wilderness at all
             var wild = getAdjacent(pos.x(), pos.z()).stream()
@@ -49,44 +49,32 @@ public class WallStrategy {
             int rotDeg;
             if (w == 2 && areOpposites(pos, wild)) {
                 schematic = "schematics/wallColumn_1_lvl1.schem";   // default N–S
-                rotDeg    = computeColumnRotation(pos.x(), pos.z(), wild); // 0 or 90
+                rotDeg = computeColumnRotation(pos.x(), pos.z(), wild); // 0 or 90
             } else if (w == 2) {
                 schematic = "schematics/wallCorner_1_lvl1.schem";   // default S+E
-                rotDeg    = computeWallRotation(pos.x(), pos.z(), wild, 2);
+                rotDeg = computeWallRotation(pos.x(), pos.z(), wild, 2);
             } else if (w == 3) {
                 schematic = "schematics/wallPocket_1_lvl1.schem";   // default E+S+W
-                rotDeg    = computeWallRotation(pos.x(), pos.z(), wild, 3);
+                rotDeg = computeWallRotation(pos.x(), pos.z(), wild, 3);
             } else { // w == 1
                 schematic = "schematics/wall_1_lvl1.schem";         // default S
-                rotDeg    = computeWallRotation(pos.x(), pos.z(), wild, 1);
+                rotDeg = computeWallRotation(pos.x(), pos.z(), wild, 1);
             }
-
-            // Now check for an existing building on THIS border chunk
-            Optional<Building> at = registry.getBuildingAt(townName, pos.x(), pos.z());
-            if (at.isPresent() && !at.get().overwriteable()) {
-                // non-overwritable (e.g., vault) — skip placing the wall here
-                continue;
-            }
-            at.ifPresent(b -> registry.removeBuilding(townName, b)); // safe: we ARE placing
-
-            // flatten, paste, register
-            Chunk chunk = bworld.getChunkAt(pos.x(), pos.z());
-            TerrainHelper.flattenChunk(chunk, groundY);
-            Location origin = chunk.getBlock(0, groundY, 0).getLocation();
-
-            try {
-                SchematicHelper.pasteSchematicFromJar(plugin, schematic, origin, rotDeg);
-            } catch (Exception e) {
-                plugin.getLogger().severe("Wall paste failed at " + pos + ": " + e);
-                // optional: restore removed building if paste fails
-                continue;
-            }
-
-            registry.addBuilding(townName, new Building("wall", 1, pos.x(), pos.z(), false));
+            tasks.add(new WallTask(pos.x(), pos.z(), groundY, schematic, rotDeg));
         }
+
+        new WallBatcher(plugin,registry,bworld,townName,tasks, claimed)
+                .start(/*perTick=*/3, /*initialDelayTicks=*/1L);
+
     }
 
-
+    final class WallTask {
+        final int chunkX, chunkZ, groundY, rotDeg;
+        final String schematic;
+        WallTask(int cx, int cz, int gy, String sch, int rot) {
+            this.chunkX = cx; this.chunkZ = cz; this.groundY = gy; this.schematic = sch; this.rotDeg = rot;
+        }
+    }
 
     /**
      * Compute CCW rotation to align default-open directions with actual wilderness sides.
