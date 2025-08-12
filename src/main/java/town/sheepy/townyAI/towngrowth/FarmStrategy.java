@@ -42,8 +42,8 @@ public class FarmStrategy {
                                     ))
                                     .count();
                             String schematic = adjacentFarms >= 2
-                                    ? "schematics/farm_1_lvl1.schem"
-                                    : "schematics/farm_2_lvl1.schem";
+                                    ? "schematics/Plains/Farm/farm_1_lvl1.schem"
+                                    : "schematics/Plains/Farm/farm_2_lvl1.schem";
 
                             // paste
                             Location origin = chunk.getBlock(0, groundY, 0).getLocation();

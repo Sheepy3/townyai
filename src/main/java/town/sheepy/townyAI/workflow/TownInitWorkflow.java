@@ -4,7 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.block.Biome;
-import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import town.sheepy.townyAI.TownyAI;
@@ -118,7 +117,7 @@ public class TownInitWorkflow implements Workflow {
                 try {
                     SchematicHelper.pasteSchematicFromJar(
                             plugin,
-                            "schematics/homeblock_1_lvl1.schem",
+                            "schematics/Plains/homeblock_1_lvl1.schem",
                             origin
                     );
                     plugin.getLogger().info("Vault schematic pasted.");

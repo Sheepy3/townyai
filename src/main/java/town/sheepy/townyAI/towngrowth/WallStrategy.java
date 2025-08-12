@@ -1,16 +1,10 @@
 package town.sheepy.townyAI.towngrowth;
 
 import com.palmergames.bukkit.towny.TownyAPI;
-import com.palmergames.bukkit.towny.object.TownBlock;
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldedit.world.World;
 import org.bukkit.Chunk;
-import org.bukkit.Location;
 import org.bukkit.scheduler.BukkitRunnable;
 import town.sheepy.townyAI.TownyAI;
-import town.sheepy.townyAI.model.Building;
 import town.sheepy.townyAI.store.TownRegistry;
-import town.sheepy.townyAI.terrain.SchematicHelper;
 import town.sheepy.townyAI.terrain.TerrainHelper;
 
 import java.util.*;
@@ -48,16 +42,16 @@ public class WallStrategy {
             String schematic;
             int rotDeg;
             if (w == 2 && areOpposites(pos, wild)) {
-                schematic = "schematics/wallColumn_1_lvl1.schem";   // default N–S
+                schematic = "schematics/Plains/Wall/wallColumn_1_lvl1.schem";   // default N–S
                 rotDeg = computeColumnRotation(pos.x(), pos.z(), wild); // 0 or 90
             } else if (w == 2) {
-                schematic = "schematics/wallCorner_1_lvl1.schem";   // default S+E
+                schematic = "schematics/Plains/Wall/wallCorner_1_lvl1.schem";   // default S+E
                 rotDeg = computeWallRotation(pos.x(), pos.z(), wild, 2);
             } else if (w == 3) {
-                schematic = "schematics/wallPocket_1_lvl1.schem";   // default E+S+W
+                schematic = "schematics/Plains/Wall/wallPocket_1_lvl1.schem";   // default E+S+W
                 rotDeg = computeWallRotation(pos.x(), pos.z(), wild, 3);
             } else { // w == 1
-                schematic = "schematics/wall_1_lvl1.schem";         // default S
+                schematic = "schematics/Plains/Wall/wall_1_lvl1.schem";         // default S
                 rotDeg = computeWallRotation(pos.x(), pos.z(), wild, 1);
             }
             tasks.add(new WallTask(pos.x(), pos.z(), groundY, schematic, rotDeg));

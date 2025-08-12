@@ -29,7 +29,7 @@ public class SchematicHelper {
             Location targetLoc,
             int rotationDegrees
     ) throws Exception {
-        // 1. Extract resource to disk (or reuse existing)
+        // 1. Extract resource to disk
         File schematic = ensureSchematicFile(plugin, resourcePath);
 
         // 2. Detect format from the File
@@ -38,7 +38,7 @@ public class SchematicHelper {
             throw new IllegalArgumentException("Unknown schematic format: " + schematic.getName());
         }
 
-        // 3. Read the schematic from the File, not the JAR stream
+        // 3. Read the schematic from the File
         Clipboard clipboard;
         try (FileInputStream fis = new FileInputStream(schematic)) {
             clipboard = format.getReader(fis).read();
@@ -48,7 +48,7 @@ public class SchematicHelper {
 
         ClipboardHolder holder = new ClipboardHolder(clipboard);
 
-        //schematic rotation
+        //Schematic rotation
         AffineTransform transform = new AffineTransform().rotateY(rotationDegrees);
         holder.setTransform(transform);
         IntVector2 off = rotationOffset(rotationDegrees);
@@ -75,23 +75,25 @@ public class SchematicHelper {
             String resourcePath,
             Location targetLoc
     ) throws Exception {
-        // simply delegate to the full API with 0 degrees
         pasteSchematicFromJar(plugin, resourcePath, targetLoc, 0);
     }
 
     public static File ensureSchematicFile(JavaPlugin plugin, String resourcePath) throws IOException {
-        String name = resourcePath.substring(resourcePath.lastIndexOf('/') + 1);
-        File out = new File(plugin.getDataFolder(), name);
+        File out = new File(plugin.getDataFolder(), resourcePath);
+        File parent = out.getParentFile();
+        if (!parent.exists() && !parent.mkdirs()) {
+            throw new IOException("Failed to create directories: " + parent);
+        }
+
         if (!out.exists()) {
-            plugin.getDataFolder().mkdirs();
-            try (InputStream in = plugin.getResource(resourcePath);
-                 OutputStream outStream = new FileOutputStream(out)) {
-                if (in == null) {
-                    throw new FileNotFoundException("Resource not found: " + resourcePath);
+            try (InputStream in = plugin.getResource(resourcePath)) {
+                if (in == null) throw new FileNotFoundException("Resource not found in JAR: " + resourcePath);
+                try (OutputStream os = new FileOutputStream(out)) {
+                    in.transferTo(os);
                 }
-                in.transferTo(outStream);
             }
         }
         return out;
     }
+
 }
