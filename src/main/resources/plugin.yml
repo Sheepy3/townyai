@@ -16,4 +16,8 @@ commands:
   placestructure:
     description: Place a schematic in your current chunk for testing.
     usage: /placestructure <schematic> [rotation]
+  flattenhere:
+    description: flattens chunk
+    usage: /<command> [y]
+
 depend: [WorldEdit, Towny, TownyUtilities, FlagWar]

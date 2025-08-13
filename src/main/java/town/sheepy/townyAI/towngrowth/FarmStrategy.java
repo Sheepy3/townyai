@@ -32,7 +32,7 @@ public class FarmStrategy {
             @Override
             public void run() {
 
-                List<Building> farms = registry.getBuildingsByType(name, "farm");
+                //List<Building> farms = registry.getBuildingsByType(name, "farm");
                 FarmStrategy.pickFarmChunk(homeChunk, name, registry)
                         .ifPresent(chunk -> {
                             long adjacentFarms = registry.getBuildingsByType(name, "farm").stream()
@@ -47,7 +47,7 @@ public class FarmStrategy {
 
                             // paste
                             Location origin = chunk.getBlock(0, groundY, 0).getLocation();
-                            TerrainHelper.flattenChunk(chunk, groundY);
+                            TerrainHelper.flattenChunk(plugin, chunk, groundY);
                             int[] options = {0, 90, 180, 270};
                             int rot = options[new Random().nextInt(options.length)];
                             try {

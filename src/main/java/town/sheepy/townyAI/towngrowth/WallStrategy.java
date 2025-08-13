@@ -141,7 +141,7 @@ public class WallStrategy {
         int groundY = registry.getGroundLevel(townName);
         for (var w : walls) {
             Chunk c = bworld.getChunkAt(w.chunkX(), w.chunkZ());
-            TerrainHelper.flattenChunk(c, groundY);
+            TerrainHelper.flattenChunk(plugin, c, groundY);
         }
 
         // then remove all wall entries from the registry

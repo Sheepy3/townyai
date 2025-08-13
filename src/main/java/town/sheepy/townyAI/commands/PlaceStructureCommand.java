@@ -47,7 +47,7 @@ public class PlaceStructureCommand implements CommandExecutor {
         sender.sendMessage("§aPlacing schematic '" + schematic + "' with rotation " + rotation);
         try {
             // Call the 4-arg helper
-            TerrainHelper.flattenChunk(chunk, originY);
+            TerrainHelper.flattenChunk(plugin, chunk, originY);
             SchematicHelper.pasteSchematicFromJar(plugin, schematic, origin, rotation);
             sender.sendMessage("§aSchematic placed.");
         } catch (Exception ex) {

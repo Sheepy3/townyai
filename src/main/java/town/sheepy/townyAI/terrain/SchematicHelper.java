@@ -27,7 +27,8 @@ public class SchematicHelper {
             TownyAI plugin,
             String resourcePath,
             Location targetLoc,
-            int rotationDegrees
+            int rotationDegrees,
+            boolean ignoreAir
     ) throws Exception {
         // 1. Extract resource to disk
         File schematic = ensureSchematicFile(plugin, resourcePath);
@@ -64,11 +65,19 @@ public class SchematicHelper {
                         targetLoc.getBlockY()+1,
                         targetLoc.getBlockZ() + off.z()
                 ))
-                .ignoreAirBlocks(false)
+                .ignoreAirBlocks(ignoreAir)
                 .build();
         Operations.complete(pasteOp);
 
         editSession.close();
+    }
+    public static void pasteSchematicFromJar( //overload if no air flag is passed
+                                              TownyAI plugin,
+                                              String resourcePath,
+                                              Location targetLoc,
+                                              int rotationDegrees
+    ) throws Exception {
+        pasteSchematicFromJar(plugin, resourcePath, targetLoc, rotationDegrees, false);
     }
     public static void pasteSchematicFromJar( //overload if no rotation is passed
             TownyAI plugin,

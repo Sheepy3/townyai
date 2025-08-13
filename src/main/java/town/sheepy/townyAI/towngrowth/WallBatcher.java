@@ -1,5 +1,6 @@
 package town.sheepy.townyAI.towngrowth;
 
+import com.palmergames.bukkit.towny.TownyAPI;
 import org.bukkit.World;
 import org.bukkit.Chunk;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -16,6 +17,7 @@ final class WallBatcher {
     private final String townName;
     private final java.util.ArrayDeque<WallStrategy.WallTask> queue;
     private final java.util.Set<TownGrowthHelper.ChunkPos> claimed;
+    private final java.util.Set<TownGrowthHelper.ChunkPos> flattenedWilderness = new java.util.HashSet<>();
     WallBatcher(TownyAI plugin,
                 TownRegistry registry,
                 World world,
@@ -63,15 +65,22 @@ final class WallBatcher {
                 int nx = wt.chunkX + off[0];
                 int nz = wt.chunkZ + off[1];
                 TownGrowthHelper.ChunkPos npos = new TownGrowthHelper.ChunkPos(nx, nz);
-                // Wilderness if not in Towny's claimed set for this town
-                if (!claimed.contains(npos)) {
+
+                // Not our town's claim AND first time we touch this neighbor this batch
+                if (!claimed.contains(npos) && flattenedWilderness.add(npos)) {
+                    // Extra safety: ensure it's true wilderness (not another town) [TO BE IMPLEMENTED LOL]
+                    //var tb = TownyAPI.getInstance().getTownBlock(world, nx, nz);
+                    //boolean isWilderness = (tb == null) || !tb.hasTown();
+                    //if (!isWilderness) continue;
+
                     Chunk neighbor = world.getChunkAt(nx, nz); // sync, main thread
-                    TerrainHelper.flattenChunk(neighbor, wt.groundY);
+                    TerrainHelper.flattenChunk(plugin, neighbor, wt.groundY);
+                    // (optional) plugin.getLogger().info("Flattened wilderness at " + nx + "," + nz);
                 }
             }
 
             // Flatten + paste schematic
-            TerrainHelper.flattenChunk(chunk, wt.groundY);
+            TerrainHelper.flattenChunk(plugin, chunk, wt.groundY);
             var origin = chunk.getBlock(0, wt.groundY, 0).getLocation();
             SchematicHelper.pasteSchematicFromJar(plugin, wt.schematic, origin, wt.rotDeg);
 

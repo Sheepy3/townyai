@@ -1,10 +1,15 @@
 package town.sheepy.townyAI.terrain;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import town.sheepy.townyAI.TownyAI;
+
 public class TerrainHelper {
 
-    public static void flattenChunk(Chunk chunk, int groundY) {
+    public static final int WATER_EXPOSED_THRESHOLD = 32;
+
+    public static void flattenChunk(TownyAI plugin, Chunk chunk, int groundY) {
         World world = chunk.getWorld();
         int baseX = chunk.getX() * 16;
         int baseZ = chunk.getZ() * 16;
@@ -22,40 +27,50 @@ public class TerrainHelper {
                 }
             }
         }
-        //maps chunk surface and finds lowest point
+        int exposed = countExposedWaterOrIce(chunk);
+        if (exposed > WATER_EXPOSED_THRESHOLD) {
+            int seafloor = chunkHeightNoWater(chunk);
+            int bottom   = Math.max(world.getMinHeight(), seafloor - 5);
+
+            Location topOrigin = chunk.getBlock(0, groundY, 0).getLocation();
+            try { SchematicHelper.pasteSchematicFromJar(plugin, "schematics/platformTop_1.schem", topOrigin, 0); }
+            catch (Exception e) { plugin.getLogger().severe("Failed to paste platformTop_1: " + e); }
+
+            for (int y = groundY - 2; y >= bottom; y--) {
+                Location legOrigin = chunk.getBlock(0, y, 0).getLocation();
+                try { SchematicHelper.pasteSchematicFromJar(plugin, "schematics/platformLegs_1.schem", legOrigin, 0,true); }
+                catch (Exception e) { plugin.getLogger().severe("Failed to paste platformLegs_1 at y=" + y + ": " + e); }
+            }
+            return;
+        }
+
+        // --- Normal (land) fill: map surface and fill up to groundY with dirt ---
         int minSurfaceY = Integer.MAX_VALUE;
         int[][] surfaceHeights = new int[16][16];
-        for (int dx=0; dx<16; dx++){
-            for (int dz = 0; dz <16; dz++){
-                int x = baseX + dx;
-                int z = baseZ + dz;
 
-                int y = world.getHighestBlockYAt(x,z);
+        for (int dx = 0; dx < 16; dx++) {
+            for (int dz = 0; dz < 16; dz++) {
+                int x = baseX + dx, z = baseZ + dz;
+                int y = world.getHighestBlockYAt(x, z);
 
-                while (y>=0 && world.getBlockAt(x,y,z).getType()==Material.WATER) {
+                while (y >= world.getMinHeight() && world.getBlockAt(x, y, z).getType() == Material.WATER) {
                     y--;
                 }
 
                 surfaceHeights[dx][dz] = y;
-                if (y<minSurfaceY){
-                    minSurfaceY = y;
+                if (y < minSurfaceY) minSurfaceY = y;
+            }
+        }
+
+        for (int dx = 0; dx < 16; dx++) {
+            for (int dz = 0; dz < 16; dz++) {
+                int x = baseX + dx, z = baseZ + dz;
+                for (int y = minSurfaceY; y <= groundY; y++) {
+                    world.getBlockAt(x, y, z).setType(Material.DIRT, false);
                 }
             }
         }
-        //fill in dirt
-        for (int dx=0; dx < 16; dx++){
-            for (int dz=0; dz<16; dz++){
-                int x = baseX+dx;
-                int z = baseZ+dz;
-                for (int y = minSurfaceY; y<=groundY; y++)
-                    world.getBlockAt(x,y,z).setType(Material.DIRT);
-            }
-        }
-
-
     }
-
-
 
     public static int chunkHeightNoTree(Chunk chunk) {
         World world = chunk.getWorld();
@@ -153,8 +168,5 @@ public class TerrainHelper {
                 m == Material.LILY_PAD || m == Material.SEA_PICKLE ||
                 m == Material.BUBBLE_COLUMN;
     }
-
-
-
-
 }
+

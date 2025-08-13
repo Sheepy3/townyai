@@ -109,7 +109,7 @@ public class TownInitWorkflow implements Workflow {
                 chunk = leader.getLocation().getChunk();
                 groundY = leader.getLocation().getBlockY()-1;
                 plugin.getLogger().info(String.valueOf(groundY));
-                TerrainHelper.flattenChunk(chunk, groundY);
+                TerrainHelper.flattenChunk(plugin, chunk, groundY);
                 Location origin = leader.getLocation()
                     .getChunk()
                     .getBlock(0,groundY,0)
