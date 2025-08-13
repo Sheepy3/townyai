@@ -32,13 +32,15 @@ public class TownRegistry {
         }
     }
 
-    public boolean addTown(String name, int chunkX, int chunkY){
+    public boolean addTown(String name, int chunkX, int chunkZ){
         String key = "towns." + name.toLowerCase();
         if (cfg.contains(key)) return false; //false if town with name already exists
-
         cfg.set(key + ".name", name);
         cfg.set(key + ".x", chunkX);
-        cfg.set(key + ".z", chunkY);
+        cfg.set(key + ".z", chunkZ);
+        cfg.set(key + ".claims", 0); //init
+        cfg.set(key + ".resources", 0); //init
+
         save();
         return true;
     }

@@ -28,8 +28,13 @@ public class ChunkStatsCommand implements CommandExecutor {
         var chunk = p.getLocation().getChunk(); //player chunk
         if (args.length == 0) {
             int height = TerrainHelper.chunkHeightNoTree(chunk);
+            int exposed = TerrainHelper.countExposedWaterOrIce(chunk);
+            boolean watery = exposed > 32;
+            int seafloor = TerrainHelper.chunkHeightNoWater(chunk);
             p.sendMessage("§aChunkStats: (" + chunk.getX() + "," + chunk.getZ() +
                     ") non‑tree height = " + height);
+            p.sendMessage("  › exposed water/ice columns: " + exposed + (watery ? " §c(>32 → water chunk)" : ""));
+            p.sendMessage("  › seafloor minY (ignore water/ice): " + seafloor);
             return true;
         }
 
