@@ -16,7 +16,7 @@ import town.sheepy.townyAI.store.TownRegistry;
 import town.sheepy.townyAI.towngrowth.FarmStrategy;
 import town.sheepy.townyAI.towngrowth.ClaimStrategy;
 import town.sheepy.townyAI.towngrowth.WallStrategy;
-
+import town.sheepy.townyAI.towngrowth.TownGrowthHelper;
 import java.util.Random;
 
 public class NewDayListener implements Listener {
@@ -72,6 +72,11 @@ public class NewDayListener implements Listener {
 
                 int toClaim = Math.min(target - claims, rng.nextInt(3) + 1);
                 claimSvc.claim(name, homeChunk, toClaim);
+
+                //update town radius
+                int radius = TownGrowthHelper.computeTownRadius(name, plugin.getRegistry());
+                plugin.getRegistry().setTownRadius(name, radius);
+                plugin.getLogger().info(name + ": townRadius recalculated = " + radius);
 
             } else {
                 plugin.getLogger().info(name + " is building today instead of claiming.");

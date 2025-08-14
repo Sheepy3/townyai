@@ -1,5 +1,7 @@
 package town.sheepy.townyAI.towngrowth;
 
+import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.object.TownBlock;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import town.sheepy.townyAI.model.Building;
@@ -12,16 +14,12 @@ import java.util.*;
  */
 public class TownGrowthHelper {
 
-    /**
-     * 1) Chebyshev distance between two chunks.
-     */
+    // Chebyshev distance between two chunks.
     public static int chebyshevDistance(int x1, int z1, int x2, int z2) {
         return Math.max(Math.abs(x1 - x2), Math.abs(z1 - z2));
     }
 
-    /**
-     * 2) Cardinally adjacent chunk coords around (x,z).
-     */
+    //Cardinally adjacent chunk coords around (x,z).
     public static List<ChunkPos> getAdjacent(int x, int z) {
         return List.of(
                 new ChunkPos(x+1, z),
@@ -29,6 +27,21 @@ public class TownGrowthHelper {
                 new ChunkPos(x,   z+1),
                 new ChunkPos(x,   z-1)
         );
+    }
+
+    public static int computeTownRadius(String townName, TownRegistry registry) {
+        int homeX = registry.getChunkX(townName);
+        int homeZ = registry.getChunkZ(townName);
+
+        var town = TownyAPI.getInstance().getTown(townName);
+        if (town == null) return 0;
+
+        int max = 0;
+        for (TownBlock tb : town.getTownBlocks()) {
+            int d = chebyshevDistance(homeX, homeZ, tb.getX(), tb.getZ());
+            if (d > max) max = d;
+        }
+        return max+1;
     }
 
     /**
@@ -54,7 +67,7 @@ public class TownGrowthHelper {
                 occupied.add(new ChunkPos(b.chunkX(), b.chunkZ()));
             }
         }
-        // also reserve the home chunk
+        // reserve the home chunk
         occupied.add(new ChunkPos(homeChunk.getX(), homeChunk.getZ()));
 
         int homeX = homeChunk.getX(), homeZ = homeChunk.getZ();
@@ -102,6 +115,10 @@ public class TownGrowthHelper {
         };
     }
 
+
+
+    //both of these records are the same dumbass.
+    // why the fuck is there two records that are the exact same? fix it. idiot.
     /**
      * Small helper to carry a pair of ints.
      */

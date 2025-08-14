@@ -20,6 +20,7 @@ public class TownInitWorkflow implements Workflow {
     private final String code;
     private final boolean manual;
     private final int coordx, coordy, coordz;
+    private final int target;
     private int stage = 0;
 
     public TownInitWorkflow(TownyAI plugin,
@@ -29,7 +30,8 @@ public class TownInitWorkflow implements Workflow {
                             boolean manual,
                             int coordx,
                             int coordy,
-                            int coordz) {
+                            int coordz,
+                            int target) {
         this.plugin     = plugin;
         this.townName   = townName;
         this.leaderName = leaderName;
@@ -38,6 +40,7 @@ public class TownInitWorkflow implements Workflow {
         this.coordx     = coordx;
         this.coordy     = coordy;
         this.coordz     = coordz;
+        this.target     = target;
     }
     @Override
     public String getCode() {
@@ -153,30 +156,23 @@ public class TownInitWorkflow implements Workflow {
                 String type = value.contains("ocean")
                         ? "ocean" : "normal";
 
+                var registry = plugin.getRegistry();
 
-                // bell‑curve sampling for town size between 64–225
-                Random rand = new Random();
-                int target = (int) Math.round(256/6.0 * (
-                        rand.nextGaussian() + 2));         // center ~128
-                target = Math.max(64, Math.min(225, target));
-
-
-                boolean added = plugin.getRegistry()
+                boolean added = registry
                         .addTown(townName, chunk.getX(), chunk.getZ());
-
                 //metadata
-                plugin.getRegistry().setType(townName, type);
-                plugin.getRegistry().setTargetSize(townName, target);
-                plugin.getRegistry().setGroundLevel(townName, groundY);
-                plugin.getRegistry().setLeaderName(townName, leaderName);
+                registry.setType(townName, type);
+                registry.setTargetSize(townName, target);
+                registry.setGroundLevel(townName, groundY);
+                registry.setLeaderName(townName, leaderName);
+                registry.addBuilding(
+                        townName,
+                        new Building("vault", 1, chunk.getX(), chunk.getZ(), false)
+                );
                 plugin.getLogger().info(added
                         ? "Town '" + townName + "' created at chunk (" +
                         chunk.getX() + "," + chunk.getZ() + ")."
                         : "Town already exists."
-                );
-                plugin.getRegistry().addBuilding(
-                        townName,
-                        new Building("vault", 1, chunk.getX(), chunk.getZ(), false)
                 );
                 return true;
             default:

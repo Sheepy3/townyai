@@ -1,0 +1,16 @@
+townlevels:
+  1:
+    size: 49
+    max_towns: 2
+  2:
+    size: 81
+    max_towns: 3
+  3:
+    size: 144
+    max_towns: 3
+  4:
+    size: 256
+    max_towns: 3
+  5:
+    size: 400
+    max_towns: 2

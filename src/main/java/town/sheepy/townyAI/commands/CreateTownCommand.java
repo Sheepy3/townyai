@@ -44,7 +44,23 @@ public class CreateTownCommand implements CommandExecutor {
             }
         }
 
+        var svc = plugin.getLevelService();
+        var registry = plugin.getRegistry();
 
+        // Count how many towns are already assigned to each level (by their targetSize)
+        java.util.Map<Integer, Integer> used = new java.util.HashMap<>();
+        for (String t : registry.getAllTowns()) {
+            int ts = registry.getTargetSize(t);                 // max-claims cap for that town
+            var lvlOpt = svc.levelForSize(ts);                  // reverse-map size → level
+            lvlOpt.ifPresent(lvl -> used.merge(lvl, 1, Integer::sum));
+        }
+        var chosenOpt = svc.pickAnyEligible(used);
+        if (chosenOpt.isEmpty()) {
+            plugin.getLogger().info("No town levels available (all at capacity). Ask an admin to raise max_towns in config.");
+            sender.sendMessage("§cNo town levels available (all at capacity). Ask an admin to raise max_towns in config.");
+            return true; // abort
+        }
+        var target = chosenOpt.get().size();
         // 3) Create & register workflow
         TownInitWorkflow wf = new TownInitWorkflow(
                 plugin,
@@ -54,7 +70,8 @@ public class CreateTownCommand implements CommandExecutor {
                 manual,
                 coordx,
                 coordy,
-                coordz
+                coordz,
+                target
         );
         plugin.registerWorkflow(wf);
         plugin.getLogger().info("workflow started!");

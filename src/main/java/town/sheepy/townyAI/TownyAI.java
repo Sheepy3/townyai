@@ -13,6 +13,8 @@ import town.sheepy.townyAI.workflow.Workflow;
 public final class TownyAI extends JavaPlugin {
     private TownRegistry registry;
 
+    private town.sheepy.townyAI.store.TownLevelService levelService;
+    public town.sheepy.townyAI.store.TownLevelService getLevelService() { return levelService; }
 
     @Override
     public void onEnable() {
@@ -30,8 +32,14 @@ public final class TownyAI extends JavaPlugin {
                 .setExecutor(new PlaceStructureCommand(this));
         this.getCommand("flattenhere")
                 .setExecutor(new FlattenHereCommand(this));
+
         getServer().getPluginManager()
                 .registerEvents(new NewDayListener(this), this);
+
+        saveDefaultConfig(); // ensure config.yml is copied out once
+        levelService = new town.sheepy.townyAI.store.TownLevelService(this);
+
+
 
     }
 

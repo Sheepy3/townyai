@@ -40,13 +40,19 @@ public class TownRegistry {
         cfg.set(key + ".z", chunkZ);
         cfg.set(key + ".claims", 0); //init
         cfg.set(key + ".resources", 0); //init
-
+        cfg.set(key + ".townRadius", 1); //init
         save();
         return true;
     }
 
     public boolean containsTown(String townName) {
         return cfg.contains("towns." + townName.toLowerCase());
+    }
+
+    public java.util.List<String> getAllTowns() {
+        var sec = cfg.getConfigurationSection("towns");
+        if (sec == null) return java.util.List.of();
+        return new java.util.ArrayList<>(sec.getKeys(false));
     }
 
     //sets the ground level of the town, generally on town initialization
@@ -230,6 +236,18 @@ public class TownRegistry {
         cfg.set(base, kept);
         save();
         return removed;
+    }
+
+    public int getTownRadius(String townName) {
+        return cfg.getInt("towns."+townName.toLowerCase()+".townRadius");
+    }
+
+    public boolean setTownRadius(String townName, int radius) {
+        String key = "towns." + townName.toLowerCase();
+        if (!cfg.contains(key)) return false;
+        cfg.set(key + ".townRadius", radius);
+        save();
+        return true;
     }
 
     public int getChunkX(String townName) {

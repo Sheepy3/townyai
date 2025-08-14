@@ -8,6 +8,7 @@ import town.sheepy.townyAI.TownyAI;
 public class TerrainHelper {
 
     public static final int WATER_EXPOSED_THRESHOLD = 32;
+    public static final int CLIFF_THRESHOLD = 20;
 
     public static void flattenChunk(TownyAI plugin, Chunk chunk, int groundY) {
         World world = chunk.getWorld();
@@ -28,9 +29,16 @@ public class TerrainHelper {
             }
         }
         int exposed = countExposedWaterOrIce(chunk);
-        if (exposed > WATER_EXPOSED_THRESHOLD) {
-            int seafloor = chunkHeightNoWater(chunk);
-            int bottom   = Math.max(world.getMinHeight(), seafloor - 5);
+        boolean cliff = (groundY-chunkMinHeightNoTree(chunk)) >=CLIFF_THRESHOLD;
+        if (exposed > WATER_EXPOSED_THRESHOLD || cliff) {
+            int floor;
+            if(exposed < WATER_EXPOSED_THRESHOLD) {
+                floor = chunkMinHeightNoTree(chunk);
+            }else{
+                floor = chunkHeightNoWater(chunk);
+            }
+
+            int bottom   = Math.max(world.getMinHeight(), floor - 5);
 
             Location topOrigin = chunk.getBlock(0, groundY, 0).getLocation();
             try { SchematicHelper.pasteSchematicFromJar(plugin, "schematics/platformTop_1.schem", topOrigin, 0); }
@@ -72,6 +80,7 @@ public class TerrainHelper {
         }
     }
 
+    //returns chunks max height
     public static int chunkHeightNoTree(Chunk chunk) {
         World world = chunk.getWorld();
         int baseX = chunk.getX() << 4;
@@ -85,17 +94,41 @@ public class TerrainHelper {
 
                 int y = world.getHighestBlockYAt(x, z);
                 // step down until we hit non‑tree material
-                while (y > 0 && isTreeBlock(world.getBlockAt(x, y, z).getType()) || !world.getBlockAt(x,y,z).isSolid()) {
+                while (y > 0 && isTreeBlock(world.getBlockAt(x, y, z).getType())
+                        || !world.getBlockAt(x,y,z).isSolid()) {
                     y--;
                 }
-                if (y > maxGroundY) {
-                    maxGroundY = y;
-                }
+                if (y > maxGroundY) maxGroundY = y;
             }
         }
         return maxGroundY;
     }
+    //returns chunks min height
+    public static int chunkMinHeightNoTree(Chunk chunk) {
+        World world = chunk.getWorld();
+        int baseX = chunk.getX() << 4;
+        int baseZ = chunk.getZ() << 4;
+        int minY = world.getMinHeight();
 
+        int minGroundY = Integer.MAX_VALUE;
+
+        for (int dx = 0; dx < 16; dx++) {
+            for (int dz = 0; dz < 16; dz++) {
+                int x = baseX + dx, z = baseZ + dz;
+                int y = world.getHighestBlockYAt(x, z);
+
+                while (y > minY && (isTreeBlock(world.getBlockAt(x, y, z).getType())
+                        || !world.getBlockAt(x, y, z).isSolid())) {
+                    y--;
+                }
+                if (y < minGroundY) minGroundY = y;
+            }
+        }
+        return (minGroundY == Integer.MAX_VALUE) ? minY : minGroundY;
+    }
+
+
+    //returns seafloor (chunks minimum height)
     public static int chunkHeightNoWater(Chunk chunk) {
         World world = chunk.getWorld();
         int baseX = chunk.getX() << 4;
