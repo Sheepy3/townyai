@@ -41,6 +41,7 @@ public class TownRegistry {
         cfg.set(key + ".claims", 0); //init
         cfg.set(key + ".resources", 0); //init
         cfg.set(key + ".townRadius", 1); //init
+        cfg.set(key + ".townLevel", 0); //init
         save();
         return true;
     }
@@ -246,6 +247,18 @@ public class TownRegistry {
         String key = "towns." + townName.toLowerCase();
         if (!cfg.contains(key)) return false;
         cfg.set(key + ".townRadius", radius);
+        save();
+        return true;
+    }
+
+    public int getTownLevel(String townName) {
+        return cfg.getInt("towns." + townName.toLowerCase() + ".townLevel");
+    }
+
+    public boolean setTownLevel(String townName, int level) {
+        String base = "towns." + townName.toLowerCase();
+        if (!cfg.contains(base)) return false;
+        cfg.set(base + ".townLevel", level);
         save();
         return true;
     }

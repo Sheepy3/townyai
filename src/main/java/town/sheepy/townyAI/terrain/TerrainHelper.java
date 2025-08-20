@@ -16,6 +16,10 @@ public class TerrainHelper {
         int baseZ = chunk.getZ() * 16;
         int maxY = world.getMaxHeight();
 
+        if (isAlreadyFlatAtY(chunk, groundY)) {
+            return;
+        }
+
         // clear above ground blocks e.g. leaves and hills
         for (int dx = 0; dx < 16; dx++) {
             for (int dz = 0; dz < 16; dz++) {
@@ -201,5 +205,25 @@ public class TerrainHelper {
                 m == Material.LILY_PAD || m == Material.SEA_PICKLE ||
                 m == Material.BUBBLE_COLUMN;
     }
+
+    private static boolean isAlreadyFlatAtY(Chunk chunk, int groundY) {
+        World world = chunk.getWorld();
+        int baseX = chunk.getX() << 4;
+        int baseZ = chunk.getZ() << 4;
+        for (int dx = 0; dx < 16; dx++) {
+            for (int dz = 0; dz < 16; dz++) {
+                int x = baseX + dx, z = baseZ + dz;
+                int y = world.getHighestBlockYAt(x, z);
+                //plugin.getLogger().info(String.valueOf(y));
+                if (y != groundY) {
+                    return false; // any mismatch means not uniformly flat at groundY
+                }
+            }
+        }
+        return true;
+    }
+
+
+
 }
 

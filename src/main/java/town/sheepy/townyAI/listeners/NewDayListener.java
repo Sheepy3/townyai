@@ -31,6 +31,7 @@ public class NewDayListener implements Listener {
         this.claimSvc = new ClaimStrategy(plugin, plugin.getRegistry());
         this.farmSvc = new FarmStrategy(plugin, plugin.getRegistry());
         this.wallSvc = new WallStrategy(plugin, plugin.getRegistry());
+
     }
 
     @EventHandler
@@ -51,12 +52,9 @@ public class NewDayListener implements Listener {
             }
             Random rng = new Random();
 
-            if(registry.getClaimCount(name) > 9){
-                plugin.getLogger().info("building walls!");
-                wallSvc.rebuildWalls(name);
-            }
 
-            if (rng.nextInt(100) < 60) {
+
+            if (rng.nextInt(100) < 60 || registry.getTownLevel(name) == 0) {
                 int claims = townObj.getTownBlocks().size();
                 registry.setClaimCount(name, claims);
                 int award = claims * 5;
@@ -73,6 +71,22 @@ public class NewDayListener implements Listener {
                 int toClaim = Math.min(target - claims, rng.nextInt(3) + 1);
                 claimSvc.claim(name, homeChunk, toClaim);
 
+                var levelsvc = plugin.getLevelService();
+                int targetSize = registry.getTargetSize(name);
+                int capLevel = levelsvc.levelForSize(targetSize).orElse(0);   // if no match, capLevel=0
+                int newLevel = 0;
+                for (var def : levelsvc.allLevels()) {
+                    if (def.level() > capLevel) break;     // don’t exceed assigned cap
+                    if (claims >= def.size()) newLevel = def.level();
+                }
+                if (newLevel != registry.getTownLevel(name)) {
+                    registry.setTownLevel(name, newLevel);
+                    plugin.getLogger().info(name + ": townLevel -> " + newLevel + " (claims=" + claims + ", cap=" + capLevel + ")");
+
+                    plugin.getLogger().info("building walls!");
+                    wallSvc.rebuildWalls(name);
+
+                }
                 //update town radius
                 int radius = TownGrowthHelper.computeTownRadius(name, plugin.getRegistry());
                 plugin.getRegistry().setTownRadius(name, radius);

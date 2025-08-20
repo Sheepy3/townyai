@@ -1,6 +1,7 @@
 package town.sheepy.townyAI;
 import org.bukkit.plugin.java.JavaPlugin;
 import town.sheepy.townyAI.commands.*;
+import town.sheepy.townyAI.listeners.FlagListener;
 import town.sheepy.townyAI.listeners.NewDayListener;
 import town.sheepy.townyAI.workflow.TownInitWorkflow;
 import java.util.*;
@@ -35,7 +36,8 @@ public final class TownyAI extends JavaPlugin {
 
         getServer().getPluginManager()
                 .registerEvents(new NewDayListener(this), this);
-
+        getServer().getPluginManager()
+                .registerEvents(new FlagListener(this), this);
         saveDefaultConfig(); // ensure config.yml is copied out once
         levelService = new town.sheepy.townyAI.store.TownLevelService(this);
 
